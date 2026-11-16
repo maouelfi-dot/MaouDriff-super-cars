@@ -1,0 +1,20 @@
+{
+	"schemaVersion": 1,
+	"id": "carprops",
+	"version": "${version}",
+	"name": "CarProps",
+	"description": "Taruh model mobil 3D (OBJ) sebagai properti di dunia Minecraft untuk foto & video sinematik. Ukuran bisa diatur, mengkilap di shader, model lain bisa ditambah lewat resource pack / folder config.",
+	"authors": ["Maou"],
+	"license": "CC0-1.0",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["com.maou.carprops.CarProps"],
+		"client": ["com.maou.carprops.client.CarPropsClient"]
+	},
+	"depends": {
+		"fabricloader": ">=0.16.0",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}

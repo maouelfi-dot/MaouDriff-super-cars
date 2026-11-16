@@ -1,0 +1,55 @@
+{
+  "name": "BMW M4 F82",
+  "lods": [
+    "model_hd.obj",
+    "model_lo.obj"
+  ],
+  "texture": "palette.png",
+  "paintMaterials": [
+    "paint"
+  ],
+  "glassMaterials": [
+    "glass"
+  ],
+  "lightMaterials": [
+    "light9",
+    "light11",
+    "light20"
+  ],
+  "steerParts": [
+    "wheel_FL",
+    "wheel_FR"
+  ],
+  "finishes": {
+    "gloss": [
+      0.03125,
+      0.25
+    ],
+    "metallic": [
+      0.09375,
+      0.25
+    ],
+    "matte": [
+      0.15625,
+      0.25
+    ],
+    "chrome": [
+      0.21875,
+      0.25
+    ]
+  },
+  "defaultFinish": "gloss",
+  "defaultColor": "#1c1c24",
+  "scale": 1.0,
+  "rotY": 0,
+  "offset": [
+    0,
+    0,
+    0
+  ],
+  "dims": {
+    "length": 4.7,
+    "width": 1.85,
+    "height": 1.33
+  }
+}
