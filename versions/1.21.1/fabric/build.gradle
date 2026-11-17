@@ -2,7 +2,69 @@ plugins {
     // Fabric の開発環境。1.7 はこのリポジトリの Gradle 8.8 で動く最後の系統（1.8 以降は Gradle を上げる必要があり、
     // ForgeGradle・ModDevGradle 側にも響く）
     id 'fabric-loom' version '1.7.4'
-    
+}
+
 // Loom が最初から持つ runClient / runServer を止める。設定を消してもタスクは残るので、動かないようにする。
 // 残っていると、ルートから runClient / runServer を打ったときに Forge 版と同時に起動する（実行すると飛ばされるだけになる）
 tasks.matching { it.name in ['runClient', 'runServer'] }.configureEach { enabled = false }
+
+base {
+    archivesName = "${project.mod_id}-fabric-${project.minecraft_version}"
+}
+version = project.mod_version
+group = project.mod_group_id
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    // Kode memakai nama Mojang (KeyMapping, Gui, ItemInHandRenderer, dst.)
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    compileOnly 'org.jetbrains:annotations:24.1.0'
+}
+
+// Kode dan resource bersama: core/ dan versions/1.21.1/common/ ikut masuk ke jar ini (maoudrift.png ada di core/).
+sourceSets {
+    main {
+        java {
+            srcDir rootProject.file('core/src/main/java')
+            srcDir rootProject.file('versions/1.21.1/common/src/main/java')
+        }
+        resources {
+            srcDir rootProject.file('core/src/main/resources')
+            srcDir rootProject.file('versions/1.21.1/common/src/main/resources')
+        }
+    }
+}
+
+// fabric.mod.json dibuat dari templates/ (isi ${mod_id}, ${mod_version}, dst.)
+processResources {
+    def props = [
+        mod_id               : project.mod_id,
+        mod_name             : project.mod_name,
+        mod_version          : project.mod_version,
+        mod_license          : project.mod_license,
+        mod_authors          : project.mod_authors,
+        mod_description      : project.mod_description,
+        loader_version       : project.loader_version,
+        minecraft_version_range: project.minecraft_version_range
+    ]
+    inputs.properties props
+    from('src/main/templates') {
+        expand props
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+    options.encoding = 'UTF-8'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
