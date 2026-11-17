@@ -1,0 +1,834 @@
+{
+  "car_engine_i4_turbo_900_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_turbo_900_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_turbo_900_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_turbo_900_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_turbo_1600_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_turbo_1600_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_turbo_1600_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_turbo_1600_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_turbo_2800_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_turbo_2800_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_turbo_2800_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_turbo_2800_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_turbo_4500_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_turbo_4500_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_turbo_4500_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_turbo_4500_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_turbo_7000_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_turbo_7000_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_turbo_7000_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_turbo_7000_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_900_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_900_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_900_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_900_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_1600_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_1600_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_1600_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_1600_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_2800_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_2800_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_2800_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_2800_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_4500_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_4500_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_4500_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_4500_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_7000_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_7000_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i4_7000_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i4_7000_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i6_900_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i6_900_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i6_900_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i6_900_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i6_1600_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i6_1600_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i6_1600_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i6_1600_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i6_2800_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i6_2800_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i6_2800_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i6_2800_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i6_4500_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i6_4500_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i6_4500_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i6_4500_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i6_7000_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i6_7000_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_i6_7000_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_i6_7000_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_flat6_900_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_flat6_900_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_flat6_900_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_flat6_900_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_flat6_1600_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_flat6_1600_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_flat6_1600_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_flat6_1600_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_flat6_2800_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_flat6_2800_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_flat6_2800_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_flat6_2800_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_flat6_4500_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_flat6_4500_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_flat6_4500_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_flat6_4500_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_flat6_7000_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_flat6_7000_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_flat6_7000_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_flat6_7000_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_v8_900_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_v8_900_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_v8_900_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_v8_900_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_v8_1600_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_v8_1600_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_v8_1600_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_v8_1600_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_v8_2800_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_v8_2800_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_v8_2800_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_v8_2800_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_v8_4500_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_v8_4500_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_v8_4500_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_v8_4500_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_v8_7000_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_v8_7000_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_v8_7000_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_v8_7000_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_diesel4_900_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_diesel4_900_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_diesel4_900_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_diesel4_900_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_diesel4_1600_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_diesel4_1600_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_diesel4_1600_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_diesel4_1600_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_diesel4_2800_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_diesel4_2800_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_diesel4_2800_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_diesel4_2800_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_diesel4_4500_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_diesel4_4500_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_diesel4_4500_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_diesel4_4500_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_diesel4_7000_lift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_diesel4_7000_lift",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_engine_diesel4_7000_load": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:engine_diesel4_7000_load",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_exhaust": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:exhaust",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_road": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_road",
+    "sounds": [
+      {
+        "name": "maoudrift:roadnoise",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "car_wind": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_wind",
+    "sounds": [
+      {
+        "name": "maoudrift:wind",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "car_slip": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_slip",
+    "sounds": [
+      {
+        "name": "maoudrift:slip",
+        "stream": false,
+        "attenuation_distance": 48
+      }
+    ]
+  },
+  "car_slip_chatter": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_slip",
+    "sounds": [
+      {
+        "name": "maoudrift:slip_chatter",
+        "stream": false,
+        "attenuation_distance": 48
+      }
+    ]
+  },
+  "car_gravel": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_gravel",
+    "sounds": [
+      {
+        "name": "maoudrift:gravel",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "car_sand": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_sand",
+    "sounds": [
+      {
+        "name": "maoudrift:sand",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "car_shift": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_shift",
+    "sounds": [
+      {
+        "name": "maoudrift:shift",
+        "stream": false,
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "car_crash": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_crash",
+    "sounds": [
+      {
+        "name": "maoudrift:crash",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "car_exhaust_high": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_exhaust",
+    "sounds": [
+      {
+        "name": "maoudrift:exhaust_high",
+        "stream": false,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "race_light": {
+    "category": "master",
+    "subtitle": "subtitles.maoudrift.race_light",
+    "sounds": [
+      {
+        "name": "maoudrift:race_light",
+        "stream": false
+      }
+    ]
+  },
+  "race_start": {
+    "category": "master",
+    "subtitle": "subtitles.maoudrift.race_start",
+    "sounds": [
+      {
+        "name": "maoudrift:race_start",
+        "stream": false
+      }
+    ]
+  },
+  "race_split": {
+    "category": "master",
+    "subtitle": "subtitles.maoudrift.race_split",
+    "sounds": [
+      {
+        "name": "maoudrift:race_split",
+        "stream": false
+      }
+    ]
+  },
+  "race_finish": {
+    "category": "master",
+    "subtitle": "subtitles.maoudrift.race_finish",
+    "sounds": [
+      {
+        "name": "maoudrift:race_finish",
+        "stream": false
+      }
+    ]
+  },
+  "car_turbo": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_turbo",
+    "sounds": [
+      {
+        "name": "maoudrift:turbo",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "car_blowoff": {
+    "category": "neutral",
+    "subtitle": "subtitles.maoudrift.car_blowoff",
+    "sounds": [
+      {
+        "name": "maoudrift:blowoff",
+        "stream": false,
+        "attenuation_distance": 48
+      }
+    ]
+  }
+}

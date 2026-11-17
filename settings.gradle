@@ -1,13 +1,13 @@
 pluginManagement {
-	repositories {
-		maven {
-			name = 'Fabric'
-			url = 'https://maven.fabricmc.net/'
-		}
-		mavenCentral()
-		gradlePluginPortal()
-	}
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        maven { name = 'Fabric'; url = 'https://maven.fabricmc.net/' }
+    }
 }
 
-// Should match your modid
-rootProject.name = 'carprops'
+rootProject.name = 'maoudrift'
+
+// Maou Drift = Fabric 1.21.1 saja. Kode bersama ada di core/ dan versions/1.21.1/common/ (hanya folder sumber).
+include 'fabric-1.21.1'
+project(':fabric-1.21.1').projectDir = file('versions/1.21.1/fabric')

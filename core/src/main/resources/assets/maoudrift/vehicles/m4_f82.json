@@ -1,0 +1,66 @@
+{
+  "shadowRadius": 1.4,
+  "seat": [
+    -0.42,
+    -0.7,
+    0.3
+  ],
+  "designRideHeight": 0.5436,
+  "body": {
+    "model": "maoudrift:models/entity/m4.obj",
+    "texture": "maoudrift:textures/entity/m4.png"
+  },
+  "sounds": {
+    "engine": "i6"
+  },
+  "paints": [
+    {
+      "id": "white",
+      "name": "White",
+      "texture": "maoudrift:textures/entity/m4.png",
+      "swatch": "#EFEFEC"
+    },
+    {
+      "id": "black",
+      "name": "Black",
+      "texture": "maoudrift:textures/entity/m4_black.png",
+      "swatch": "#0C0C0E"
+    },
+    {
+      "id": "blue",
+      "name": "Blue",
+      "texture": "maoudrift:textures/entity/m4_blue.png",
+      "swatch": "#1B4DB3"
+    },
+    {
+      "id": "red",
+      "name": "Red",
+      "texture": "maoudrift:textures/entity/m4_red.png",
+      "swatch": "#B3141C"
+    },
+    {
+      "id": "silver",
+      "name": "Silver",
+      "texture": "maoudrift:textures/entity/m4_silver.png",
+      "swatch": "#A6A9AE"
+    },
+    {
+      "id": "yellow",
+      "name": "Yellow",
+      "texture": "maoudrift:textures/entity/m4_yellow.png",
+      "swatch": "#F0C410"
+    },
+    {
+      "id": "orange",
+      "name": "Orange",
+      "texture": "maoudrift:textures/entity/m4_orange.png",
+      "swatch": "#E8620C"
+    },
+    {
+      "id": "green",
+      "name": "Green",
+      "texture": "maoudrift:textures/entity/m4_green.png",
+      "swatch": "#1D6B3A"
+    }
+  ]
+}

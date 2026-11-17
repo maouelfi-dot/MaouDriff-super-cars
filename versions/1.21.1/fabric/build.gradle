@@ -1,0 +1,8 @@
+plugins {
+    // Fabric の開発環境。1.7 はこのリポジトリの Gradle 8.8 で動く最後の系統（1.8 以降は Gradle を上げる必要があり、
+    // ForgeGradle・ModDevGradle 側にも響く）
+    id 'fabric-loom' version '1.7.4'
+    
+// Loom が最初から持つ runClient / runServer を止める。設定を消してもタスクは残るので、動かないようにする。
+// 残っていると、ルートから runClient / runServer を打ったときに Forge 版と同時に起動する（実行すると飛ばされるだけになる）
+tasks.matching { it.name in ['runClient', 'runServer'] }.configureEach { enabled = false }

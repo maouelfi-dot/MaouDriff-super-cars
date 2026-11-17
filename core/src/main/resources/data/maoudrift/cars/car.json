@@ -1,0 +1,19 @@
+{
+  "order": 0,
+  "values": {
+    "wheel_base": 3.312,
+    "front_track_width": 2.2952,
+    "rear_track_width": 2.2952,
+    "wheel_radius": 0.3896,
+    "mass": 1300,
+    "peak_torque": 520,
+    "peak_torque_rpm": 5500,
+    "redline_rpm": 7600
+  },
+  "default_parts": {
+    "wheel": {
+      "part": "maoudrift:te37",
+      "removable": true
+    }
+  }
+}

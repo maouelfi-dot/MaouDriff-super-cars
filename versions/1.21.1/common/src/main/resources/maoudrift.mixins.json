@@ -1,0 +1,20 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.maou.maoudrift.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "CameraAccessor",
+    "CameraMixin",
+    "FrustumMixin",
+    "GuiAccessor",
+    "IrisPipelineMixin",
+    "KeyMappingAccessor",
+    "MainRenderTargetMixin",
+    "OverlayMessageMixin",
+    "PlayerModelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

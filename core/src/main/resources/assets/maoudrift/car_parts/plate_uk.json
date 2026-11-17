@@ -1,0 +1,15 @@
+{
+  "plate": {
+    "model": "maoudrift:models/plate/uk.obj",
+    "texture": "maoudrift:textures/plate/uk_front.png",
+    "texture_rear": "maoudrift:textures/plate/uk_rear.png",
+    "fields": {
+      "text": {
+        "font": "maoudrift:plate_fonts/barlowcondensed-semibold.ttf",
+        "color": "#141414",
+        "fit": "condense",
+        "format": "upper"
+      }
+    }
+  }
+}

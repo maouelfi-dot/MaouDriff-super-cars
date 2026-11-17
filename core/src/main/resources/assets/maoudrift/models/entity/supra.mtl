@@ -1,0 +1,86 @@
+# Maou Drift
+newmtl m_aMKIVF11994BaseMaterial1
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+
+newmtl m_IVF11994Carbon2Material1
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+
+newmtl m_VF11994ColouredMaterial1
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+
+newmtl m_VF11994Grille1AMaterial1
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+
+newmtl m_VF11994Grille2AMaterial1
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+
+newmtl m_VF11994Grille3AMaterial1
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+
+newmtl m_VF11994Grille4AMaterial1
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+
+newmtl m_VF11994Grille6AMaterial1
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+
+newmtl m_VF11994Grille7AMaterial1
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+
+newmtl m_VF11994Grille8AMaterial1
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+
+newmtl m_F11994InteriorAMaterial1
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+
+newmtl m_ufacturerPlateAMaterial1
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+
+newmtl m_KIVF11994PaintAMaterial1
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+
+newmtl m_F11994TexturedAMaterial1
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+
+newmtl m_glass
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+
+newmtl m_doorglass
+Kd 1.000000 1.000000 1.000000
+d 0.350000
+illum 2
+
+newmtl m_lens
+Kd 1.000000 1.000000 1.000000
+d 1.000000
+illum 2
+

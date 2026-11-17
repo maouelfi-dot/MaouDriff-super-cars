@@ -1,0 +1,6 @@
+{
+  "wheel": {
+    "model": "maoudrift:models/entity/wheel.obj",
+    "texture": "maoudrift:textures/entity/wheel.png"
+  }
+}

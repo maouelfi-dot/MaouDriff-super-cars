@@ -1,0 +1,7 @@
+{
+  "_comment": "メッシュは tools/make_tires.py が作る。内径と外径はメッシュから測るので書かなくてよい",
+  "tire": {
+    "model": "maoudrift:models/entity/tire_dirt.obj",
+    "texture": "maoudrift:textures/entity/tire_block.png"
+  }
+}

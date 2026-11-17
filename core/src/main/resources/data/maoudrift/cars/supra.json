@@ -1,0 +1,19 @@
+{
+  "order": 2,
+  "values": {
+    "wheel_base": 3.06,
+    "front_track_width": 1.8473,
+    "rear_track_width": 1.8473,
+    "wheel_radius": 0.3913,
+    "mass": 1520,
+    "peak_torque": 650,
+    "peak_torque_rpm": 4800,
+    "redline_rpm": 7400
+  },
+  "default_parts": {
+    "wheel": {
+      "part": "maoudrift:wheel_supra",
+      "removable": true
+    }
+  }
+}

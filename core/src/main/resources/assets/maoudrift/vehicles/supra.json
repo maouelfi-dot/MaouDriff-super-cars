@@ -1,0 +1,16 @@
+{
+  "shadowRadius": 1.4,
+  "seat": [
+    -0.42,
+    -0.67,
+    0.25
+  ],
+  "designRideHeight": 0.5736,
+  "body": {
+    "model": "maoudrift:models/entity/supra.obj",
+    "texture": "maoudrift:textures/entity/supra.png"
+  },
+  "sounds": {
+    "engine": "i6"
+  }
+}

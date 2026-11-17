@@ -1,0 +1,725 @@
+package com.maou.maoudrift.tuning;
+
+import com.maou.maoudrift.config.SpeedUnit;
+import org.jetbrains.annotations.Nullable;
+import com.maou.maoudrift.physics.CarSpec;
+import com.maou.maoudrift.physics.Wheel;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
+/**
+ * 調整画面に並べる項目の一覧。
+ *
+ * <p><b>ここに 1 行足せば、画面・リセット・サーバーへの同期がすべて追従する。</b>
+ * パケットは {@link #ALL} の順に値を並べて送るので、順序を変えるとクライアントと
+ * サーバーで解釈がずれる点にだけ注意する（バージョンをまたぐ互換性はまだ考えていない）。</p>
+ *
+ * <p>載せていないのは、車の性格ではなく数値計算の都合で決まっている値
+ * （{@code CarPhysics} の定数にしてある）と、<b>他の諸元が決まれば
+ * 決まってしまう値</b>。後者は {@link CarSpec} 側のメソッドとして導出してある:</p>
+ *
+ * <table border="1">
+ *   <caption>導出される諸元</caption>
+ *   <tr><th>諸元</th><th>何から決まるか</th></tr>
+ *   <tr><td>バネ定数（前後）</td><td>荷重とストローク（沈み込みの割合を一定に保つ）</td></tr>
+ *   <tr><td>ダンパーの係数</td><td>減衰比（諸元）とそのバネと分担荷重</td></tr>
+ *   <tr><td>バンプストップ</td><td>停車時荷重</td></tr>
+ *   <tr><td>重心高</td><td>停車時の車高</td></tr>
+ *   <tr><td>慣性モーメント 3 つ</td><td>車重とホイールベース／トレッド</td></tr>
+ *   <tr><td>車輪の慣性</td><td>タイヤ半径</td></tr>
+ *   <tr><td>登坂限界</td><td>タイヤ半径（と 1 ブロックぶんの下限）</td></tr>
+ *   <tr><td>ファイナル</td><td>タイヤ半径（総減速比÷半径 を一定に保つ）</td></tr>
+ *   <tr><td>制動配分</td><td>荷重配分・重心高・ホイールベース</td></tr>
+ *   <tr><td>ブレーキとサイドの効き</td><td>タイヤの摩擦係数（と後軸の荷重割合）</td></tr>
+ *   <tr><td>変速点</td><td>レブリミットと段の比</td></tr>
+ *   <tr><td>バックの最高速</td><td>レブリミットと 1 速の総減速比とタイヤ半径</td></tr>
+ * </table>
+ *
+ * <p><b>導出した値は、それを決めている項目の補足として画面に出す</b>（バネならストロークと
+ * 車重の行に「33600/26400 N/m・沈み 9.8cm」と出る）。数字が見えないと、効いているのか
+ * 分からないため。</p>
+ *
+ * <p><b>寸法（{@code wheelBase}・{@code frontTrackWidth}・{@code rearTrackWidth}・{@code wheelRadius}）を動かすと
+ * タイヤの位置と大きさだけが変わり、車体は変わらない。</b>タイヤは物理が置く位置に描かれる
+ * のに対し、車体はメッシュの形が正で（伸ばすとキャビンごと伸びてしまう）追従させていないため。
+ * 大きく動かすとタイヤがフェンダーからはみ出すが、これは<b>そういう車を作ったことの正直な表示</b>
+ * として受け入れている。車体の大きさを合わせたいときは
+ * {@code assets/maoudrift/vehicles/car.json} の {@code bodyScale} で別に指定する。</p>
+ *
+ * <p>タイヤ半径だけは<b>接地の辻褄が自動で合う</b>。静止時のサス長は半径に依らないので、
+ * 車高（{@code staticRideHeight}）が半径ぶん持ち上がり、タイヤはちょうど接地したまま
+ * 車体が上がる（＝リフトアップ）。ギア比を通して最高速にも効く。</p>
+ */
+public final class Tunables {
+
+    /** 見出しでまとめた項目の束。 */
+    public record Group(String name, List<TunableParameter> parameters) {
+
+        public String translationKey() {
+            return "tuning.maoudrift.group." + name;
+        }
+
+        /** タブに出す短い名前。 */
+        public String shortKey() {
+            return "tuning.maoudrift.group." + name + ".short";
+        }
+    }
+
+    public static final List<Group> GROUPS = List.of(
+            new Group("suspension", List.of(
+                    // バネとバンプストップは荷重・ストローク・沈み込み率から決まるので、N/m の項目は無い
+                    // （ダンパーは減衰比を次のタブで持ち、係数はバネに追従する）。
+                    // ストロークを短くすれば沈み込み率のぶんだけ硬く、長くすれば柔らかくなる
+                    TunableParameter.linear("stroke", 15, 100, "%.0f",
+                                    CarSpec::suspensionMaxLength, CarSpec.Builder::suspensionMaxLength)
+                            .unit(0.01)
+                            .detail(Tunables::springs),
+                    // 沈み込み率。停車時にストロークの何 % 沈むか。<b>N/m で持たない</b>のは、
+                    // 車重を変えると沈み込みがストロークを超える組み合わせが作れてしまうため。
+                    // 大きいほど柔らかく、伸び側（段差でタイヤが下へ追いかける量）が増えて車高は下がる。
+                    // オフロードは大きく、舗装路は小さく
+                    TunableParameter.linear("static_sag", 20, 70, "%.0f",
+                                    CarSpec::staticSag, CarSpec.Builder::staticSag)
+                            .unit(0.01)
+                            .detail(Tunables::sagTravel),
+                    // 車体の当たり判定の地上高。見た目の車体は変わらない。上げるほど段差で腹を擦らず、
+                    // 120cm なら 1 ブロックの段にも車体が当たらない（タイヤが登れる高さまで）
+                    TunableParameter.linear("body_clearance", 10, 120, "%.0f",
+                                    CarSpec::bodyClearance, CarSpec.Builder::bodyClearance)
+                            .unit(0.01),
+                    // スタビはバネと違って左右逆に動くときだけ効くので、沈み込みも
+                    // ノーズダイブも変えずにロールだけ締められる。0 で無し。
+                    // 見せる補足がロール剛性の前後配分なのは、ロール量より
+                    // 「アンダーかオーバーか」がこの配分で決まるため
+                    TunableParameter.linear("front_anti_roll", 0, 20000, "%.0f",
+                                    CarSpec::frontAntiRollStiffness, CarSpec.Builder::frontAntiRollStiffness)
+                            .detail(Tunables::frontRollShare),
+                    TunableParameter.linear("rear_anti_roll", 0, 20000, "%.0f",
+                                    CarSpec::rearAntiRollStiffness, CarSpec.Builder::rearAntiRollStiffness)
+                            .detail(Tunables::frontRollShare),
+                    // サスの形式。0 で独立懸架、1 でリジッドアクスル（左右を 1 本の車軸でつなぐ）。
+                    // リジッドは片輪が段に乗ると軸ごと傾き、内側のバネは軸の傾きに逆らう力が弱いので、
+                    // 対角の輪が浮きにくい（既定の車で、対角のねじれで浮き始める高さが 18cm → 前後リジッドで 30cm）。
+                    // 代わりに軸のロール剛性も下がり、舗装路のコーナーで車体がよく傾く（前後リジッドでロール約 2 倍）
+                    TunableParameter.linear("front_solid_axle", 0, 1, "%.0f",
+                                    CarSpec::frontSolidAxle, CarSpec.Builder::frontSolidAxle)
+                            .detail(spec -> detail(spec.isSolidAxle(Wheel.FRONT_LEFT) ? "solid_axle" : "independent")),
+                    TunableParameter.linear("rear_solid_axle", 0, 1, "%.0f",
+                                    CarSpec::rearSolidAxle, CarSpec.Builder::rearSolidAxle)
+                            .detail(spec -> detail(spec.isSolidAxle(Wheel.REAR_LEFT) ? "solid_axle" : "independent")),
+                    // ロールセンター。重心高に対する %。横力のこの高さぶんはバネを通らず
+                    // 直接タイヤへ移る（ロールを待たない）。スタビと同じく前を高くするとアンダーだが、
+                    // こちらは<b>ロールを減らしながら</b>配分を動かす。補足はそのときの
+                    // 荷重移動の前配分とロール量
+                    TunableParameter.linear("front_roll_center", 0, 80, "%.0f",
+                                    CarSpec::frontRollCenter, CarSpec.Builder::frontRollCenter)
+                            .unit(0.01)
+                            .detail(Tunables::rollCenter),
+                    TunableParameter.linear("rear_roll_center", 0, 80, "%.0f",
+                                    CarSpec::rearRollCenter, CarSpec.Builder::rearRollCenter)
+                            .unit(0.01)
+                            .detail(Tunables::rollCenter))),
+
+            // ダンパー。臨界減衰に対する割合（減衰比）で持つので、ストロークや車重を変えても
+            // 係数がバネに追従して効き方が変わらない。縮み側は路面の入力とロール・ピッチの入り、
+            // 伸び側は揺り返しと、荷重が抜ける側の戻りの速さを決める。補足は実際の係数
+            new Group("damper", List.of(
+                    damping("front_bump_damping", Wheel.FRONT_LEFT, false,
+                            CarSpec::frontBumpDamping, CarSpec.Builder::frontBumpDamping),
+                    damping("front_rebound_damping", Wheel.FRONT_LEFT, true,
+                            CarSpec::frontReboundDamping, CarSpec.Builder::frontReboundDamping),
+                    damping("rear_bump_damping", Wheel.REAR_LEFT, false,
+                            CarSpec::rearBumpDamping, CarSpec.Builder::rearBumpDamping),
+                    damping("rear_rebound_damping", Wheel.REAR_LEFT, true,
+                            CarSpec::rearReboundDamping, CarSpec.Builder::rearReboundDamping))),
+
+            // ステアリングのジオメトリ（Balkwill）。ハンドルの角度とタイヤの角度を別物にする。
+            // ロールステアとコンプライアンスステアは、どちらも正でアンダー。補足は
+            // この 4 つが作るアンダーステア勾配の合計（タイヤと荷重配分のぶんは含まない）
+            new Group("geometry", List.of(
+                    TunableParameter.linear("ackermann", -50, 120, "%.0f",
+                                    CarSpec::ackermann, CarSpec.Builder::ackermann)
+                            .unit(0.01)
+                            .detail(Tunables::ackermann),
+                    TunableParameter.linear("front_toe", -1.5, 1.5, "%.2f",
+                                    CarSpec::frontToe, CarSpec.Builder::frontToe)
+                            .unit(Math.PI / 180.0)
+                            .detail(spec -> toe(spec.frontToe())),
+                    TunableParameter.linear("rear_toe", -1.5, 1.5, "%.2f",
+                                    CarSpec::rearToe, CarSpec.Builder::rearToe)
+                            .unit(Math.PI / 180.0)
+                            .detail(spec -> toe(spec.rearToe())),
+                    TunableParameter.linear("front_roll_steer", -0.2, 0.3, "%.2f",
+                                    CarSpec::frontRollSteer, CarSpec.Builder::frontRollSteer)
+                            .detail(Tunables::steerUndersteer),
+                    TunableParameter.linear("rear_roll_steer", -0.2, 0.3, "%.2f",
+                                    CarSpec::rearRollSteer, CarSpec.Builder::rearRollSteer)
+                            .detail(Tunables::steerUndersteer),
+                    TunableParameter.linear("front_compliance_steer", -0.5, 1.5, "%.2f",
+                                    CarSpec::frontComplianceSteer, CarSpec.Builder::frontComplianceSteer)
+                            .unit(Math.PI / 180.0)
+                            .detail(Tunables::steerUndersteer),
+                    TunableParameter.linear("rear_compliance_steer", -0.5, 1.5, "%.2f",
+                                    CarSpec::rearComplianceSteer, CarSpec.Builder::rearComplianceSteer)
+                            .unit(Math.PI / 180.0)
+                            .detail(Tunables::steerUndersteer))),
+
+            new Group("tire", List.of(
+                    // 目盛りは既定を 1.00 とした相対値（実際のμは CarSpec.REFERENCE_FRICTION 倍）。
+                    // ブレーキとサイドブレーキの効きもここから決まる（μg を少し超える踏力を用意する）
+                    TunableParameter.linear("friction", 0.3, 1.5, "%.2f",
+                                    CarSpec::tireFriction, CarSpec.Builder::tireFriction)
+                            .unit(CarSpec.REFERENCE_FRICTION)
+                            .detail(Tunables::brakeForce),
+                    // ピークを越えて滑ったときに失うグリップ。表示は %、内部は割合
+                    TunableParameter.linear("tire_falloff", 0, 50, "%.0f",
+                                    CarSpec::tireFalloff, CarSpec.Builder::tireFalloff)
+                            .unit(0.01),
+                    // 荷重を倍にしたときにグリップが倍にならない度合い。表示は %、内部は割合。
+                    // 0 だと荷重移動がバランスに効かず、スタビの前後配分がほとんど意味を持たない
+                    TunableParameter.linear("tire_load_sensitivity", 0, 40, "%.0f",
+                                    CarSpec::tireLoadSensitivity, CarSpec.Builder::tireLoadSensitivity)
+                            .unit(0.01),
+                    // 剛性は滑り 1（57° / 100%）あたりの値で手触りが分からないので、
+                    // 補足にはグリップを使いきるスリップ角・滑り率を出す
+                    TunableParameter.linear("cornering_stiffness", 4, 25, "%.1f",
+                                    CarSpec::corneringStiffness, CarSpec.Builder::corneringStiffness)
+                            .detail(spec -> String.format("%.1f",
+                                    Math.toDegrees(pavedGrip(spec) / spec.effectiveCorneringStiffness()))),
+                    TunableParameter.linear("longitudinal_stiffness", 5, 40, "%.1f",
+                                    CarSpec::longitudinalStiffness, CarSpec.Builder::longitudinalStiffness)
+                            .detail(spec -> String.format("%.1f",
+                                    pavedGrip(spec) / spec.effectiveLongitudinalStiffness() * 100.0)),
+                    // 見た目も追従する（CarObjRenderer がこの値でタイヤを拡大する）。
+                    // 車高・重心高・ファイナル・車輪の慣性・登坂限界がまとめてここから決まる
+                    TunableParameter.linear("wheel_radius", 25, 110, "%.1f",
+                                    CarSpec::wheelRadius, CarSpec.Builder::wheelRadius)
+                            .unit(0.01)
+                            .detail(Tunables::rideHeight))),
+
+            new Group("body", List.of(
+                    // バネ・ダンパー・慣性モーメントは車重と寸法から決まるので、ここには無い
+                    TunableParameter.linear("mass", 500, 2500, "%.0f",
+                                    CarSpec::mass, CarSpec.Builder::mass)
+                            .detail(Tunables::springs),
+                    // 前後の荷重配分。50 で中央、大きいほど前が重い。
+                    // これが 50 のままだと、スタビの前後配分を振っても効き方が対称で
+                    // 「アンダーかオーバーか」が出ない。制動配分もここから決まる
+                    TunableParameter.linear("weight_distribution", 35, 70, "%.0f",
+                                    CarSpec::weightBias, CarSpec.Builder::weightBias)
+                            .unit(0.01)
+                            .detail(Tunables::axleLoads),
+                    // 寸法はタイヤの位置だけを動かす。車体は追従しない（メッシュの形が正）
+                    // 既定が実車の 1.7 倍なので、範囲も実車相当（2.6 / 1.5）から
+                    // 2 倍強までを見る
+                    TunableParameter.linear("wheel_base", 2.0, 7.0, "%.2f",
+                                    CarSpec::wheelBase, CarSpec.Builder::wheelBase)
+                            .detail(Tunables::inertias),
+                    // 前後を別に持つ。補足は荷重移動の前の割合。前後の差でどちらへ振れたかが見える
+                    TunableParameter.linear("front_track_width", 1.2, 4.0, "%.2f",
+                                    CarSpec::frontTrackWidth, CarSpec.Builder::frontTrackWidth)
+                            .detail(Tunables::frontRollShare),
+                    TunableParameter.linear("rear_track_width", 1.2, 4.0, "%.2f",
+                                    CarSpec::rearTrackWidth, CarSpec.Builder::rearTrackWidth)
+                            .detail(Tunables::frontRollShare))),
+
+            new Group("engine", List.of(
+                    TunableParameter.linear("peak_torque", 60, 700, "%.0f",
+                                    CarSpec::peakTorque, CarSpec.Builder::peakTorque)
+                            .detail(Tunables::peakPower),
+                    TunableParameter.linear("peak_torque_rpm", 1500, 8000, "%.0f",
+                            CarSpec::peakTorqueRpm, CarSpec.Builder::peakTorqueRpm),
+                    // 形は 2 つの回転数で決める（諸元表と同じ書き方）。落ち方はその比から決まる
+                    TunableParameter.linear("peak_power_rpm", 2500, 12000, "%.0f",
+                                    CarSpec::peakPowerRpm, CarSpec.Builder::peakPowerRpm)
+                            .detail(Tunables::actualPeakPower),
+                    TunableParameter.linear("idle_rpm", 500, 2000, "%.0f",
+                            CarSpec::idleRpm, CarSpec.Builder::idleRpm),
+                    // 変速点もここから決まる（シフトアップは次の段に駆動力で抜かれる回転数か
+                    // レブの手前、シフトダウンは上げた直後に落ちる回転数より下）
+                    TunableParameter.linear("redline_rpm", 4000, 12000, "%.0f",
+                                    CarSpec::redlineRpm, CarSpec.Builder::redlineRpm)
+                            .detail(Tunables::shiftPoints),
+                    TunableParameter.linear("engine_brake", 0, 200, "%.0f",
+                            CarSpec::engineBrakeTorque, CarSpec.Builder::engineBrakeTorque),
+                    TunableParameter.linear("engine_inertia", 0.05, 1.0, "%.2f",
+                            CarSpec::engineInertia, CarSpec.Builder::engineInertia))),
+
+            new Group("gearbox", List.of(
+                    // ファイナルはタイヤ半径から、変速点はレブと段の比から決まるので、ここには無い。
+                    // ギアリング全体を動かしたいときは 1 速の比を使う
+                    TunableParameter.linear("gear_count", 3, 8, "%.0f",
+                                    CarSpec::gearCount, CarSpec.Builder::gearCount)
+                            .detail(Tunables::shiftPoints),
+                    TunableParameter.linear("first_gear", 1.5, 5.0, "%.2f",
+                                    CarSpec::firstGearRatio, CarSpec.Builder::firstGearRatio)
+                            .detail(Tunables::tractionLimit),
+                    TunableParameter.linear("top_gear", 0.4, 1.5, "%.2f",
+                                    CarSpec::topGearRatio, CarSpec.Builder::topGearRatio)
+                            .detail(Tunables::topGearSpeed),
+                    TunableParameter.linear("drivetrain_efficiency", 0.7, 1.0, "%.2f",
+                            CarSpec::drivetrainEfficiency, CarSpec.Builder::drivetrainEfficiency),
+                    TunableParameter.linear("shift_time", 0.0, 1.5, "%.2f",
+                            CarSpec::shiftSeconds, CarSpec.Builder::shiftSeconds),
+                    TunableParameter.linear("manual_transmission", 0.0, 1.0, "%.0f",
+                                    CarSpec::manualTransmission, CarSpec.Builder::manualTransmission)
+                            .detail(spec -> spec.isManual() ? "MT (R/F)" : "AT"),
+                    // マニュアルのシフトダウンで回転を合わせるか。切るとシフトロックが出る（AT は常に合わせる）
+                    TunableParameter.linear("rev_match", 0.0, 1.0, "%.0f",
+                                    CarSpec::revMatch, CarSpec.Builder::revMatch)
+                            .detail(spec -> !spec.isManual() ? "AT" : spec.isRevMatching() ? "ON" : "OFF"))),
+
+            new Group("driveline", List.of(
+                    // 駆動方式（FF / FR / 4WD）と 4WD の前後トルク配分は分けて持つ。1 本だった頃は
+                    // 0 と 1 だけ「方式の選択」で間が「4WD の配分」と意味が違っていた
+                    TunableParameter.linear("drive_layout", 0, 2, "%.0f",
+                                    CarSpec::driveLayout, CarSpec.Builder::driveLayout)
+                            .detail(Tunables::driveLayout),
+                    // 4WD の前後トルク配分。表示は後輪の %。配分が決めるのは回転ではなく<b>押す力</b>の分担で、
+                    // 後ろへ寄せるほど後輪が縦にグリップを使い、踏むと尻が出る（FR 寄り）
+                    TunableParameter.linear("torque_split", 10, 90, "%.0f",
+                                    CarSpec::torqueSplit, CarSpec.Builder::torqueSplit)
+                            .unit(0.01)
+                            .detail(Tunables::torqueSplit),
+                    // センターデフ（4WD の前後）。0 でオープン＝前後トルク配分どおりの固定比、1 で直結。
+                    // 締めると回転差を揃えにいき、空転しかけた軸から掴んでいる軸へトルクが移る
+                    TunableParameter.linear("center_diff_lock", 0.0, 1.0, "%.2f",
+                                    CarSpec::centerDiffLock, CarSpec.Builder::centerDiffLock)
+                            .detail(Tunables::centerDifferentialType),
+                    TunableParameter.linear("diff_preload", 0, 300, "%.0f",
+                            CarSpec::diffPreload, CarSpec.Builder::diffPreload),
+                    TunableParameter.linear("diff_lock_ratio", 0.0, 1.0, "%.2f",
+                                    CarSpec::diffLockRatio, CarSpec.Builder::diffLockRatio)
+                            .detail(Tunables::differentialType),
+                    TunableParameter.linear("diff_coast_ratio", 0.0, 1.0, "%.2f",
+                                    CarSpec::diffCoastRatio, CarSpec.Builder::diffCoastRatio)
+                            .detail(Tunables::differentialWay))),
+
+            new Group("brakes", List.of(
+                    // ブレーキの効き・制動配分・サイドブレーキ・バックの最高速は、
+                    // タイヤの摩擦係数・荷重配分・ギア比から決まるので、ここには無い
+                    TunableParameter.linear("abs", 0.0, 1.0, "%.2f",
+                                    CarSpec::abs, CarSpec.Builder::abs)
+                            .detail(spec -> spec.abs() <= 0.0 ? "OFF" : "ON"),
+                    TunableParameter.linear("rolling_resistance", 0.0, 1.0, "%.2f",
+                            CarSpec::rollingResistance, CarSpec.Builder::rollingResistance))),
+
+            new Group("aero", List.of(
+                    // Cd×前面投影面積。スポーツカー 0.5、乗用車 0.7、SUV 1.0、トラック 3 前後。
+                    // 補足の G はダウンフォースで増えた抵抗も込み
+                    TunableParameter.log("drag_area", 0.2, 5.0, "%.2f",
+                                    CarSpec::dragArea, CarSpec.Builder::dragArea)
+                            .detail(Tunables::dragAt100),
+                    // −Cl×面積を軸ごとに。前を強くするとオーバー、後ろを強くするとアンダー。
+                    // GT 系のレーシングカーで前後合わせて 2〜3、ウイング付きの市販車で 0.3〜0.6
+                    TunableParameter.linear("front_downforce", 0.0, 3.0, "%.2f",
+                                    CarSpec::frontDownforceArea, CarSpec.Builder::frontDownforceArea)
+                            .detail(spec -> downforceAt200(spec, true)),
+                    TunableParameter.linear("rear_downforce", 0.0, 3.0, "%.2f",
+                                    CarSpec::rearDownforceArea, CarSpec.Builder::rearDownforceArea)
+                            .detail(spec -> downforceAt200(spec, false)))),
+
+            new Group("controls", List.of(
+                    // ドリフト車の切れ角キット（55〜65 度）を越えて、真横（90 度）まで。
+                    // 深い角度を保ったまま前輪を進行方向へ向けきるのに要る
+                    TunableParameter.linear("max_steer", 10, 90, "%.0f",
+                                    CarSpec::maxSteerAngle, CarSpec.Builder::maxSteerAngle)
+                            .unit(Math.PI / 180.0),
+                    // 2 倍が意味を持つ量なので対数割り当て。線形だと 1.0〜2.0 の
+                    // いちばん効く領域が目盛りの端に潰れる。
+                    // 8.0 まで上げると 20m/s でも最大切れ角まで切れる（＝実質この補助は無効）
+                    TunableParameter.log("steer_grip_margin", 0.8, 8.0, "%.2f",
+                            CarSpec::steerGripMargin, CarSpec.Builder::steerGripMargin),
+                    // 滑っている間に、前軸の進む向きから切れる角度。物理と見た目の両方に効く
+                    TunableParameter.linear("visual_slip_limit", 0, 90, "%.0f",
+                                    CarSpec::visualSlipLimit, CarSpec.Builder::visualSlipLimit)
+                            .unit(Math.PI / 180.0)
+                            .detail(spec -> spec.visualSlipLimit() <= 0.0 ? "OFF" : "ON"),
+                    TunableParameter.linear("steer_rate", 0.0, 1.0, "%.2f",
+                                    CarSpec::steerRateSeconds, CarSpec.Builder::steerRateSeconds)
+                            .detail(spec -> detail(spec.steerRateSeconds() <= 0.0 ? "instant" : "gradual")),
+                    TunableParameter.linear("steer_return", 0.0, 1.0, "%.2f",
+                            CarSpec::steerReturnSeconds, CarSpec.Builder::steerReturnSeconds),
+                    TunableParameter.linear("self_aligning", 0.0, 1.0, "%.2f",
+                                    CarSpec::selfAligning, CarSpec.Builder::selfAligning)
+                            .detail(spec -> detail(spec.selfAligning() <= 0.0 ? "to_center" : "to_heading")),
+                    TunableParameter.linear("pedal_press", 0.0, 1.0, "%.2f",
+                            CarSpec::pedalPressSeconds, CarSpec.Builder::pedalPressSeconds),
+                    TunableParameter.linear("pedal_release", 0.0, 1.0, "%.2f",
+                            CarSpec::pedalReleaseSeconds, CarSpec.Builder::pedalReleaseSeconds),
+                    TunableParameter.linear("handbrake_press", 0.0, 1.0, "%.2f",
+                            CarSpec::handbrakePressSeconds, CarSpec.Builder::handbrakePressSeconds),
+                    TunableParameter.linear("traction_control", 0.0, 1.0, "%.2f",
+                                    CarSpec::tractionControl, CarSpec.Builder::tractionControl)
+                            .detail(spec -> spec.tractionControl() <= 0.0 ? "OFF" : "ON"))));
+
+    /** 全項目を並べたもの。パケットはこの順で送る。 */
+    public static final List<TunableParameter> ALL = flatten();
+
+    /** 項目名から引く。知らない名前なら null。 */
+    @Nullable
+    public static TunableParameter byName(String name) {
+        for (TunableParameter parameter : ALL) {
+            if (parameter.name().equals(name)) {
+                return parameter;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 調整画面で鍵を付けて連動させる項目の相手。無ければ null。
+     * 表の並びで隣り合う 2 行だけを組にできる（鍵はその 2 行の間に置く）。
+     */
+    @Nullable
+    public static TunableParameter linkedWith(TunableParameter parameter) {
+        return switch (parameter.name()) {
+            case "front_track_width" -> byName("rear_track_width");
+            case "rear_track_width" -> byName("front_track_width");
+            default -> null;
+        };
+    }
+
+    private Tunables() {
+    }
+
+    private static List<TunableParameter> flatten() {
+        List<TunableParameter> all = new ArrayList<>();
+        for (Group group : GROUPS) {
+            all.addAll(group.parameters());
+        }
+        return List.copyOf(all);
+    }
+
+    /** 最高出力。トルクの数字だけでは速さが読めないので併記する。 */
+    private static String peakPower(CarSpec spec) {
+        return String.format("%.0f", spec.actualPeakPower()[1] / 735.5); // 馬力
+    }
+
+    /**
+     * 項目の形を変える前に保存されたデータの読み替え。NBT とプリセット（カーパックを含む）の両方から呼ぶ。
+     *
+     * <p>トルク曲線の形はかつて {@code torque_falloff}（落ち方）で持っていた。いまは
+     * {@code peak_power_rpm} で持つので、<b>書かれていなければ落ち方と最大トルク回転数から換算する</b>。
+     * 落ち方も書かれていなければ当時の既定（0.45）で換算する——{@code peak_torque_rpm} だけ書いた
+     * カーパックが、既定の最高出力回転数（6676rpm）を押し付けられて別の曲線にならないため。
+     * <b>曲線の形をどちらも書いていなければ換算しない</b>——一部の項目だけを書いたプリセット（{@code dirt.json}）は
+     * 乗っている車の諸元へ重ねるので、ここで換算すると、その車の最高出力回転数を古い式で上書きしてしまう。</p>
+     *
+     * <p>駆動方式と 4WD の前後トルク配分は、かつて {@code drive_bias}（後輪配分）1 本で持っていた。
+     * {@code drive_layout} が書かれていなければそこから読む。</p>
+     *
+     * <p>トレッドは、かつて {@code track_width} 1 本で前後同じ値だった。前後それぞれの項目が
+     * 書かれていなければ、そこから読む。カーパックとプリセットは、前後が同じ車の書き方として
+     * いまも {@code track_width} を使ってよい。</p>
+     *
+     * @param stored 項目名から保存されていた値を引く。無ければ null
+     */
+    static CarSpec migrateLegacy(CarSpec spec, Function<String, Double> stored) {
+        CarSpec.Builder builder = spec.toBuilder();
+        if (stored.apply("peak_power_rpm") == null
+                && (stored.apply("peak_torque_rpm") != null || stored.apply("torque_falloff") != null)) {
+            Double falloff = stored.apply("torque_falloff");
+            double shape = falloff != null ? falloff : CarSpec.LEGACY_TORQUE_FALLOFF;
+            builder.peakPowerRpm(CarSpec.peakPowerRpmFor(spec.peakTorqueRpm(), shape));
+        }
+        // 駆動方式と 4WD の配分は、かつて drive_bias 1 本（後輪配分）で持っていた。
+        // 0 なら FF、1 なら FR、間なら 4WD＋その配分として読む（配分は今のスライダーの範囲へ丸める）
+        Double bias = stored.apply("drive_bias");
+        if (bias != null && stored.apply("drive_layout") == null && Double.isFinite(bias)) {
+            builder.driveBias(bias);
+            if (bias > 0.0 && bias < 1.0) {
+                builder.torqueSplit(Math.max(0.1, Math.min(0.9, bias)));
+            }
+        }
+        // 空気抵抗は、かつて減速度の係数 drag（減速度 = drag × v²）で持っていた。
+        // 力が同じになるよう、その車の車重で CdA へ換算する（½ρ・CdA = 車重 × drag）。
+        // 車重で割り戻すので、換算した車は速度ごとの減速がまったく変わらない
+        Double drag = stored.apply("drag");
+        if (drag != null && stored.apply("drag_area") == null && Double.isFinite(drag)) {
+            double area = 2.0 * spec.mass() * drag / CarSpec.AIR_DENSITY;
+            builder.dragArea(Math.max(0.2, Math.min(5.0, area)));
+        }
+        // トレッドは、かつて track_width 1 本だった（前後で片方だけ書いてあれば、書いていない側だけ読む）
+        Double track = stored.apply("track_width");
+        if (track != null && Double.isFinite(track)) {
+            if (stored.apply("front_track_width") == null) {
+                builder.frontTrackWidth(byName("front_track_width").clampInternal(track));
+            }
+            if (stored.apply("rear_track_width") == null) {
+                builder.rearTrackWidth(byName("rear_track_width").clampInternal(track));
+            }
+        }
+        return builder.build();
+    }
+
+    /**
+     * 200km/h でその軸を何 kg ぶん押し付けるか。後軸の行には前後の配分も出す
+     * （前が多いとオーバー、後ろが多いとアンダー。配分が分からないと決められない）。
+     */
+    private static Object downforceAt200(CarSpec spec, boolean front) {
+        double speed = 200.0 / 3.6;
+        String kg = String.format("%.0f", spec.downforce(front, speed) / 9.81);
+        // 空力部品が足しているぶん。スライダーの値（車体そのもの）とは別に効いていることを見せる
+        double partArea = front ? spec.partAero().front() : spec.partAero().rear();
+        String partKg = String.format("%.0f", 0.5 * CarSpec.AIR_DENSITY * partArea * speed * speed / 9.81);
+        boolean parts = partArea > 0.0;
+        if (front || spec.totalDownforce(1.0) <= 0.0) {
+            return parts ? detail("downforce_parts", kg, partKg, SpeedUnit.detail(speed))
+                    : detail("downforce", kg, SpeedUnit.detail(speed));
+        }
+        String share = String.format("%.0f", spec.downforceFrontShare() * 100.0);
+        return parts ? detail("downforce_balance_parts", kg, partKg, share, SpeedUnit.detail(speed))
+                : detail("downforce_balance", kg, share, SpeedUnit.detail(speed));
+    }
+
+    /** 100km/h での空気抵抗が何 G の減速になるか。CdA だけでは車重に対してどれほどか読めない。 */
+    private static Object dragAt100(CarSpec spec) {
+        double accel = spec.dragForce(100.0 / 3.6) / spec.mass();
+        // ダウンフォースを作るのに増えたぶん（調整画面のぶんと部品のぶん）。補足の G はこれも込み
+        double added = spec.effectiveDragArea() - spec.dragArea();
+        if (added > 1e-6) {
+            return detail("drag_area_added", String.format("%.3f", accel / 9.81), String.format("%.2f", added),
+                    SpeedUnit.detail(100.0 / 3.6));
+        }
+        return detail("drag_area", String.format("%.3f", accel / 9.81), SpeedUnit.detail(100.0 / 3.6));
+    }
+
+    /**
+     * 実際に最高出力が出る回転数と、そのときの馬力。
+     *
+     * <p>落ち方の頭打ちとレブリミットがあるので、スライダーの値どおりに出るとは限らない。
+     * レブより上に置けば、レブで頭打ちになったことがここで分かる。</p>
+     */
+    private static Object actualPeakPower(CarSpec spec) {
+        double[] peak = spec.actualPeakPower();
+        return detail("peak_power",
+                String.format("%.0f", peak[1] / 735.5),
+                String.format("%.0f", peak[0]),
+                String.format("%.2f", spec.torqueFalloff()));
+    }
+
+    /**
+     * 加速がグリップで頭打ちになるか、エンジンで決まるか。
+     *
+     * <p>グリップ律速の速度域では、トルクを上げても速くならない。エンジン律速なら、
+     * μ を上げても加速は変わらない（曲がって止まるほうが強くなるだけ）。
+     * ギアリングで行き来するので 1 速の行に出す。</p>
+     */
+    private static Object tractionLimit(CarSpec spec) {
+        double grip = spec.tractionLimitAccel() / 9.81;
+        double speed = spec.tractionLimitedSpeed();
+        if (speed >= 0.5) {
+            return detail("traction_limited", SpeedUnit.detail(speed), String.format("%.2f", grip));
+        }
+        // いちばん際どい速度（エンジンがグリップに最も迫るところ）で、同じ速度どうしを比べる
+        double closest = 0.0;
+        double closestMargin = Double.NEGATIVE_INFINITY;
+        for (double v = 0.0; v <= spec.topGearSpeed(); v += 0.5) {
+            double margin = spec.tractionMargin(v);
+            if (margin > closestMargin) {
+                closestMargin = margin;
+                closest = v;
+            }
+        }
+        double engine = spec.engineLimitAccel(closest);
+        return detail("power_limited",
+                String.format("%.2f", engine / 9.81),
+                String.format("%.2f", (engine - closestMargin) / 9.81));
+    }
+
+    /** 最高段でレブリミットまで回したときの速度。ギアの高さの目安。 */
+    private static Object topGearSpeed(CarSpec spec) {
+        return SpeedUnit.detail(spec.topGearSpeed());
+    }
+
+    /** センターデフの種類。四駆でなければ効かないことを出す。 */
+    private static Object centerDifferentialType(CarSpec spec) {
+        if (!spec.isAwd()) {
+            return detail("awd_only");
+        }
+        if (spec.centerDiffLock() >= 1.0) {
+            return detail("center_diff_locked");
+        }
+        return spec.centerDiffLock() <= 0.0 ? detail("open_diff") : "LSD";
+    }
+
+    /** 前後トルク配分の補足。前：後の比。4WD でなければ効かないことを出す。 */
+    private static Object torqueSplit(CarSpec spec) {
+        if (!spec.isAwd()) {
+            return detail("awd_only");
+        }
+        double rear = Math.round(spec.torqueSplit() * 100.0);
+        return detail("torque_split", String.format("%.0f", 100.0 - rear), String.format("%.0f", rear));
+    }
+
+    /** デフの種類。0 ならオープンデフ。 */
+    private static Object differentialType(CarSpec spec) {
+        boolean open = spec.diffLockRatio() <= 0.0 && spec.diffPreload() <= 0.0;
+        return open ? detail("open_diff") : "LSD";
+    }
+
+    /**
+     * 言葉を含む補足。キーは {@code tuning.maoudrift.detail.<name>}、引数は書式済みの文字列で渡す。
+     *
+     * <p>日本語を直接返すと英語の画面にも日本語が出る（実際に「オープンデフ」「沈み」が混ざった）。</p>
+     */
+    private static TunableParameter.Text detail(String name, Object... args) {
+        return new TunableParameter.Text("tuning.maoudrift.detail." + name, args);
+    }
+
+    /** 1way / 1.5way / 2way の呼び名。 */
+    private static String differentialWay(CarSpec spec) {
+        double coast = spec.diffCoastRatio();
+        if (coast <= 0.05) return "1way";
+        if (coast >= 0.95) return "2way";
+        return "1.5way";
+    }
+
+    /** 駆動方式の呼び名。数字だけだと何なのか分からないため。 */
+    private static String driveLayout(CarSpec spec) {
+        return switch (spec.layout()) {
+            case FF -> "FF";
+            case FR -> "FR";
+            case AWD -> "4WD";
+        };
+    }
+
+    /**
+     * タイヤ半径から決まるもの。車高（＝重心高）とファイナルと登坂限界。
+     *
+     * <p>タイヤを大きくすると車体が持ち上がり、同じギアリングを保つためにファイナルも上がる。</p>
+     */
+    private static Object rideHeight(CarSpec spec) {
+        return detail("ride_height",
+                String.format("%.0f", spec.staticRideHeight() * 100.0),
+                String.format("%.2f", spec.finalDriveRatio()),
+                String.format("%.0f", spec.maxClimbStep() * 100.0));
+    }
+
+    /**
+     * 荷重とストロークから決まるバネ定数と、そのときの沈み込み。
+     *
+     * <p>バネそのものは触れないので、代わりに<b>いくつになったか</b>を見せる。
+     * 沈み込みが前後で揃っていることもここで分かる。</p>
+     */
+    private static Object springs(CarSpec spec) {
+        return detail("springs",
+                String.format("%.0f", spec.frontSuspensionStiffness()),
+                String.format("%.0f", spec.rearSuspensionStiffness()),
+                String.format("%.1f", spec.staticWheelLoad(Wheel.FRONT_LEFT) / spec.frontSuspensionStiffness() * 100.0));
+    }
+
+    /** 沈み込み率から決まる、伸び側と縮み側の残りと車高。 */
+    private static Object sagTravel(CarSpec spec) {
+        double sag = spec.staticSag() * spec.suspensionMaxLength();
+        return detail("sag_travel",
+                String.format("%.0f", sag * 100.0),
+                String.format("%.0f", (spec.suspensionMaxLength() - sag) * 100.0),
+                String.format("%.0f", spec.staticRideHeight() * 100.0));
+    }
+
+    /** 車重と寸法から決まる慣性モーメント（ヨー／ピッチ／ロール）。 */
+    private static String inertias(CarSpec spec) {
+        return String.format("%.0f/%.0f/%.0f",
+                spec.yawInertia(), spec.pitchInertia(), spec.rollInertia());
+    }
+
+    /** タイヤの摩擦係数から決まるブレーキとサイドブレーキの効き。 */
+    private static Object brakeForce(CarSpec spec) {
+        // 目盛りが相対値なので、実際のμもここで見せる（見えないと路面の倍率と突き合わせられない）
+        return detail("brakes",
+                String.format("%.2f", spec.tireFriction()),
+                String.format("%.1f", spec.brakeDecel()),
+                String.format("%.1f", spec.handbrakeDecel()),
+                String.format("%.0f", spec.brakeBias() * 100.0));
+    }
+
+    /**
+     * 舗装路で乾いているときのμ（付けているタイヤの舗装路の倍率込み）。
+     * ピークのスリップ角・滑り率は μ / 剛性 で、荷重感度では動かない（同じ割合で割り引くため）。
+     */
+    private static double pavedGrip(CarSpec spec) {
+        return spec.tireFriction() * spec.tire().gripOn("paved");
+    }
+
+    /** レブと段の比から決まる変速点。ハンチングしていないことがここで分かる。 */
+    private static Object shiftPoints(CarSpec spec) {
+        return detail("shift_points",
+                String.format("%.0f", spec.upshiftRpm()),
+                String.format("%.0f", spec.downshiftRpm()),
+                String.format("%.0f", spec.upshiftRpm() * spec.gearStep()));
+    }
+
+    /** 前軸と後軸が受け持つ重さ [kg]。配分の数字より、何 kg 乗っているかの方が掴みやすい。 */
+    private static String axleLoads(CarSpec spec) {
+        double front = spec.mass() * spec.weightBias();
+        return String.format("%.0f/%.0f", front, spec.mass() - front);
+    }
+
+    /**
+     * ロール剛性の前後配分（前が何 %）。
+     *
+     * <p>ロール量そのものより、<b>アンダーかオーバーか</b>を決めるのがこの配分。
+     * 前を厚くすると外前輪に荷重が集まって前が先に滑る（アンダー）。50% で中立。</p>
+     *
+     * <p>スタビは左右で逆向きに効くぶん、同じ数字ならバネの 2 倍のロール剛性を生む
+     * （バネは軸あたり k・t²/2、スタビは k・t²）。</p>
+     */
+    /**
+     * 横方向の荷重移動のうち前軸が受け持つ割合（LLTD）。ロールセンターが地面なら
+     * ロール剛性の前後配分そのもので、ロールセンターを上げるとそちらの分も入る。
+     */
+    private static String frontRollShare(CarSpec spec) {
+        return String.format("%.0f", spec.frontLoadTransferShare() * 100.0);
+    }
+
+    /**
+     * アッカーマンの補足。フルロックでの内輪と外輪の切れ角。
+     * 幾何の左右差は高速の小さな舵ではほとんど付かないので、効きが見えるフルロックで出す。
+     */
+    private static Object ackermann(CarSpec spec) {
+        double lock = spec.maxSteerAngle();
+        return detail("ackermann",
+                String.format("%.1f", Math.toDegrees(spec.staticSteer(Wheel.FRONT_RIGHT, lock))),
+                String.format("%.1f", Math.toDegrees(spec.staticSteer(Wheel.FRONT_LEFT, lock))));
+    }
+
+    /** トーの向き。符号だけだとどちらがインか分からないため。 */
+    private static Object toe(double radians) {
+        if (Math.abs(radians) < 1e-6) return "0";
+        return detail(radians > 0.0 ? "toe_in" : "toe_out");
+    }
+
+    /**
+     * ロールステアとコンプライアンスステアが作るアンダーステア勾配の合計 [°/G]。
+     * 4 つの項目のどれを動かしても同じ合計が動くので、同じ補足を出す。
+     */
+    private static Object steerUndersteer(CarSpec spec) {
+        return detail("steer_understeer",
+                String.format("%+.2f", Math.toDegrees(spec.steerUndersteerGradient())));
+    }
+
+    /**
+     * ダンパーの減衰比の項目。4 つとも同じ形なので 1 か所で組み立てる。
+     *
+     * <p>上限 1.5 は刻み幅の都合。係数を 12.5ms の陽的な積分で掛けているので、
+     * これより上（ストローク 15cm でさらに硬くしたとき）は 1 刻みで速度を打ち消しすぎて振動しうる。
+     * 実車でも 1 を超える減衰比はまず使わない。</p>
+     */
+    private static TunableParameter damping(String name, Wheel wheel, boolean rebound,
+                                            TunableParameter.Getter getter, TunableParameter.Setter setter) {
+        return TunableParameter.linear(name, 0.10, 1.50, "%.2f", getter, setter)
+                .detail(spec -> String.format("%.0f", spec.suspensionDamping(wheel, rebound)));
+    }
+
+    /** ロールセンターの補足。荷重移動の前配分と、1G あたりのロール角。 */
+    private static Object rollCenter(CarSpec spec) {
+        return detail("roll_center",
+                frontRollShare(spec),
+                String.format("%.1f", Math.toDegrees(spec.rollGradient())));
+    }
+
+}

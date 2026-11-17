@@ -1,6 +1,4 @@
 build/
 .gradle/
+*.class
 run/
-.idea/
-*.iml
-.vscode/

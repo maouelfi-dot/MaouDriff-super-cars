@@ -1,0 +1,6 @@
+{
+  "wheel": {
+    "model": "maoudrift:models/entity/wheel_supra.obj",
+    "texture": "maoudrift:textures/entity/wheel_supra.png"
+  }
+}
