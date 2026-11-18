@@ -11,13 +11,17 @@ jobs:
       - uses: actions/checkout@v4
       - name: Ekstrak maou.zip
         run: |
-          mkdir src
+          rm -rf src src_real
+          mkdir -p src
           unzip -q maou.zip -d src
+          ls -la src
           # kalau isi zip ada di dalam 1 folder, masuk ke folder itu
           if [ ! -f src/gradlew ]; then
             d=$(dirname "$(find src -maxdepth 3 -name gradlew | head -n1)")
+            echo "Pindah dari $d"
             mv "$d" src_real && rm -rf src && mv src_real src
           fi
+          ls -la src
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
