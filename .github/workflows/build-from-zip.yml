@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'maou.zip'
+      - '.github/workflows/build.yml'
   workflow_dispatch:
 jobs:
   build:
